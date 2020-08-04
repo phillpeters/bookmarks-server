@@ -1,13 +1,3 @@
-drop table if exists bookmarks;
-
-create table bookmarks (
-  id UUID primary key,
-  title TEXT NOT NULL,
-  url TEXT NOT NULL,
-  description TEXT,
-  rating INTEGER NOT NULL
-);
-
 insert into bookmarks (
   id, title, url, description, rating
 )

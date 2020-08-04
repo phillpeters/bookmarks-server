@@ -1,7 +1,5 @@
-const expect = require('chai').expect;
 const knex = require('knex');
 const app = require('../src/app');
-const supertest = require('supertest');
 const { makeBookmarksArray } = require('./bookmarks.fixtures');
 
 describe.only('Bookmarks endpoints', () => {
@@ -24,8 +22,9 @@ describe.only('Bookmarks endpoints', () => {
   describe('GET /bookmarks', () => {
     context('Given there are no bookmarks in the database', () => {
       it('responds with 200 and an empty list', () => {
-        supertest(app)
+        return supertest(app)
           .get('/bookmarks')
+          .set('Authorization', `bearer ${process.env.API_TOKEN}`)
           .expect(200, []);
       });
     });
@@ -40,8 +39,9 @@ describe.only('Bookmarks endpoints', () => {
       });
       
       it('responds with 200 and all of the bookmarks', () => {
-        supertest(app)
+        return supertest(app)
           .get('/bookmarks')
+          .set('Authorization', `bearer ${process.env.API_TOKEN}`)
           .expect(200, testBookmarks);
       })
     });
@@ -50,9 +50,10 @@ describe.only('Bookmarks endpoints', () => {
   describe('GET /bookmarks/:id', () => {
     context('Given there are no bookmarks in the database', () => {
       it('responds with 404', () => {
-        const bookmarkId = 123456;
-        supertest(app)
+        const bookmarkId = '88ca5b54-83ec-4582-b493-da102a2e7d8a';
+        return supertest(app)
           .get(`/bookmarks/${bookmarkId}`)
+          .set('Authorization', `bearer ${process.env.API_TOKEN}`)
           .expect(404, { error: { message: `Bookmark doesn't exist` } });
       });
     });

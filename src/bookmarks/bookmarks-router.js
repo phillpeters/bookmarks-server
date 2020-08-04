@@ -66,9 +66,9 @@ bookmarksRouter
     BookmarksService.getBookmarkById(knexInstance, req.params.id)
       .then(bookmark => {
         if (!bookmark) {
-          logger.error(`Bookmark with id ${id} not found`);
+          logger.error(`Bookmark with id ${req.params.id} not found`);
           return res
-            .status(400)
+            .status(404)
             .json({ error: { message: `Bookmark doesn't exist` } });
         }
         res.json(bookmark);

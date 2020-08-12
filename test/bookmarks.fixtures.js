@@ -31,6 +31,28 @@ function makeBookmarksArray() {
   ];
 }
 
+function makeMaliciousBookmark() {
+  const maliciousBookmark = {
+      id: '3e450003-4e58-4283-8527-8c61166fdaba',
+      title: 'Naughty naughty very naughty <script>alert("xss");</script>',
+      url: 'http://maliciouswebsite.com',
+      description: `Bad image <img src="https://url.to.file.which/does-not.exist" onerror="alert(document.cookie);">. But not <strong>all</strong> bad.`,
+      rating: 2
+    };
+  const expectedBookmark = {
+    id: '3e450003-4e58-4283-8527-8c61166fdaba',
+    title: 'Naughty naughty very naughty &lt;script&gt;alert(\"xss\");&lt;/script&gt;',
+    url: 'http://maliciouswebsite.com',
+    description: `Bad image <img src="https://url.to.file.which/does-not.exist">. But not <strong>all</strong> bad.`,
+    rating: 2
+  };
+  return {
+    maliciousBookmark,
+    expectedBookmark
+  };
+}
+
 module.exports = {
-  makeBookmarksArray
+  makeBookmarksArray,
+  makeMaliciousBookmark
 };

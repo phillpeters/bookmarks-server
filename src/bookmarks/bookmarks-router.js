@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require(`express`);
 const { v4: uuid } = require(`uuid`);
 const logger = require("../logger");
@@ -28,7 +29,7 @@ bookmarksRouter
   .post(bodyParser, (req, res, next) => {
     const knexInstance = req.app.get('db');
     const { title, url, description = ``, rating } = req.body;
-    const bookmark = { title, url, description, rating };
+    const bookmark = { id: uuid(), title, url, description, rating };
 
     for (const [key, value] of Object.entries(bookmark)) {
       if (value == null) {
@@ -38,23 +39,18 @@ bookmarksRouter
       }
     }
 
-    if (rating < 1 || rating > 5) {
-      logger.error(`Rating is lower than 1 or higher than 5`);
-      return res
-        .status(400)
-        .json({
-          error: { message: `Rating must be between 1 and 5` }
-        });
+    if (bookmark.rating < 1 || bookmark.rating > 5) {
+      return res.status(400).json({
+        error: { message: `Rating must be between 1 and 5`}
+      });
     }
-
-    bookmark.id = uuid();
 
     BookmarksService.insertBookmark(knexInstance, bookmark)
       .then(bookmark => {
         logger.info(`Bookmark with id ${bookmark.id} created`);
         res
           .status(201)
-          .location(`/bookmarks/${bookmark.id}`)
+          .location(path.posix.join(req.originalUrl, `/${bookmark.id}`))
           .json(sanitizeBookmark(bookmark));
       })
       .catch(next);
@@ -85,6 +81,29 @@ bookmarksRouter
     BookmarksService.deleteBookmark(knexInstance, req.params.id)
       .then(() => {
         logger.info(`Bookmark with id ${req.params.id} deleted`);
+        res.status(204).end();
+      })
+      .catch(next);
+  })
+  .patch(bodyParser, (req, res, next) => {
+    const { title, url, description, rating } = req.body;
+    const bookmarkToUpdate = { title, url, description, rating };
+
+    const numberOfValues = Object.values(bookmarkToUpdate).filter(Boolean).length;
+    if (numberOfValues === 0) {
+      return res.status(400).json({
+        error: {
+          message: `Request body must contain either 'title', 'url', 'description', or 'rating'`
+        }
+      });
+    }
+
+    BookmarksService.updateBookmark(
+      req.app.get('db'),
+      req.params.id,
+      bookmarkToUpdate
+    )
+      .then(numRowsAffected => {
         res.status(204).end();
       })
       .catch(next);

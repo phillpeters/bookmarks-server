@@ -103,9 +103,13 @@ bookmarksRouter
       req.params.id,
       bookmarkToUpdate
     )
-      .then(numRowsAffected => {
-        res.status(204).end();
-      })
+    .then(bookmark => {
+      logger.info(`Bookmark with id ${bookmark.id} updated`);
+      res
+        .status(200)
+        .location(path.posix.join(req.originalUrl, `/${bookmark.id}`))
+        .json(sanitizeBookmark(bookmark));
+    })
       .catch(next);
   });
 
